@@ -118,7 +118,7 @@ pp_to_fbref_stats = {
  'outs_Under']
 """
 
-pp_to_dk_stats = {
+PP_TO_DK_STATS = {
     "Rebounds": "rebounds",
     "Points": "points",
     "Pts+Asts": "points + assists",
@@ -129,7 +129,7 @@ pp_to_dk_stats = {
     "Fantasy Score": "fantasy score",
     "3-PT Made": "three pointers made",
     'Hits Allowed': 'hits',
-    'Pitcher Strikeouts': 'strikeouts thrown',
+    'Pitcher Strikeouts': 'Strikeouts Thrown',
     'Pitching Outs': 'outs',
     # 'Earned Runs Allowed': 'earned runs',
     'Walks Allowed': 'walks',
@@ -140,7 +140,7 @@ pp_to_dk_stats = {
     'Walks': 'walks'
 }
 
-dk_to_pp_stats = {
+DK_TO_PP_STATS = {
     "rebounds": "Rebounds",
     "points": "Points",
     "points + assists": "Pts+Asts",
@@ -151,7 +151,7 @@ dk_to_pp_stats = {
     "fantasy score": "Fantasy Score",
     "three pointers made": "3-PT Made",
     'hits': 'Hits Allowed',
-    'strikeouts thrown': 'Pitcher Strikeouts',
+    'Strikeouts hrown': 'Pitcher Strikeouts',
     'outs': 'Pitching Outs',
     # 'earned runs': 'Earned Runs Allowed',
     'walks': 'Walks Allowed',
@@ -160,6 +160,5 @@ dk_to_pp_stats = {
     'total bases': 'Total Bases',
     'runs': 'Runs',
     'walks': 'Walks'
-    
 }
 

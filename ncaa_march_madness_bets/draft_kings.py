@@ -1,11 +1,19 @@
 # %%
+from curl_cffi import CurlHttpVersion
 from curl_cffi import requests
+import json, csv
+import httpx
+from bs4 import BeautifulSoup
 import csv
+from playwright.sync_api import sync_playwright
 
 draftkings_nfl_api_url = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/88808?format=json"
 draftkings_nfl_site_url = "https://sportsbook/https:.draftkings.com/leagues/football/nfl"
 draftkings_cbb_api_url = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/92483?format=json"
 draftkings_nba_api_url = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/42648?format=json"
+draftkings_mlb_api_url = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/84240?format=json"
+
+# HTTP_VERSION_1_1 = CurlHttpVersion.HTTP_VERSION_1_1
 
 # %%
 # Code to help find the api - do not run
@@ -20,41 +28,67 @@ def find_access_code_in_server():
         print(response.text)
 
 # %%
-# put a request into the url
-def get_draftkings_cbb_data():
-    response = requests.get(draftkings_cbb_api_url, headers={"User-Agent": "Mozilla/5.0"})
+# Generalized function to get data from DraftKings API
+def get_dk_data(sport):
+    api_urls = {
+        "cbb": draftkings_cbb_api_url,
+        "nba": draftkings_nba_api_url,
+        "mlb": draftkings_mlb_api_url,
+    }
 
-    json = response.json()
-    json['eventGroup'].keys()
+    if sport not in api_urls:
+        print(f"Sport {sport} not supported")
+        return
 
-    # %%
+    def get_json(url):
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)  # Start headless browser
+            page = browser.new_page()
 
+            # Navigate directly to the API endpoint
+            page.goto(url)
 
-    # %%
+            # Get the content of the page as JSON (it might be an API response directly)
+            response = page.content()  # Get page content as string (may not work for pure APIs)
+
+            # In case it's a JSON response, parse it
+            ans = None
+            try:
+                ans = page.evaluate("() => JSON.parse(document.body.innerText)")
+                 # Print the JSON data
+            except Exception as e:
+                print("Error parsing JSON:", e)
+
+            browser.close()
+            return ans
+        
+
+            
+    
+
+    def get_json_in_chunks(url):
+        response = requests.get(url, stream=True, headers={"User-Agent": "Mozilla/5.0", "Connection": "close"}, http_version=CurlHttpVersion.V1_1)
+        for chunk in response.iter_content(chunk_size=1024):
+            print(chunk)
+
+    
+    json = get_json(api_urls[sport])
+
     category_urls = {}
     cat_names = {}
     for event in json['eventGroup']['offerCategories']:
-        print(event['offerCategoryId'], event['name'])
-        category_urls[event['offerCategoryId']] = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/92483/categories/" + str(event['offerCategoryId']) + "?format=json"
+        category_urls[event['offerCategoryId']] = f"https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/{json['eventGroup']['eventGroupId']}/categories/{event['offerCategoryId']}?format=json"
         cat_names[event['offerCategoryId']] = event['name']
 
-    print(category_urls)
-
-    # %%
-    url = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/92483/categories/1218?format=json"
-    print(url)
-
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
-    json = response.json()
-
-    # %%
     csv_data = []
 
     for cat_id in category_urls:
-        response = requests.get(category_urls[cat_id], headers={"User-Agent": "Mozilla/5.0"})
-        json = response.json()
+        print(f"Getting data at website {category_urls[cat_id]}", cat_names[cat_id])
+        json = get_json(category_urls[cat_id])
+          
 
         for category in json['eventGroup']['offerCategories']:
+            # TODO: GRAB THIS DATA
             if 'offerSubcategoryDescriptors' in category.keys():
                 for offer in category['offerSubcategoryDescriptors'][0]['offerSubcategory']['offers']:
                     for i in offer:
@@ -63,85 +97,33 @@ def get_draftkings_cbb_data():
                             dict['category'] = cat_names[cat_id]
                             if 'label' in i.keys():
                                 dict['prop_label'] = i['label']
-                            else:
-                                print(i)
-                                continue
-                            csv_data.append(dict)
 
-    # %%
-    # turn the data in csv_data into a csv file
-    import csv
-
-    with open('draftkings_cbb.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(csv_data[0].keys())
-        for row in csv_data:
-            writer.writerow(row.values())
-
-# %%
-
-# %%
-
-def get_draftkings_nba_data():
-    print("Getting DraftKings NBA data")
-    try:
-       response = requests.get(draftkings_nba_api_url, impersonate="safari_ios")
-       response.raise_for_status()  # Raise an exception for bad status codes
-    except requests.exceptions.Timeout:
-       print("Request timed out")
-    except requests.exceptions.RequestException as e:
-       print(f"An error occurred: {e}")
-    print(response)
-
-    json = response.json()
-    json['eventGroup'].keys()
-
-    category_urls = {}
-    cat_names = {}
-    for event in json['eventGroup']['offerCategories']:
-        print(event['offerCategoryId'], event['name'])
-        category_urls[event['offerCategoryId']] = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/42648/categories/" + str(event['offerCategoryId']) + "?format=json"
-        cat_names[event['offerCategoryId']] = event['name']
-
-    print(category_urls)
-
-    url = "https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/42648/categories/1218?format=json"
-    print(url)
-
-    response = requests.get(url, impersonate="safari_ios")
-    json = response.json()
-    print(json.keys())
-
-    csv_data = []
-
-    for cat_id in category_urls:
-        if cat_id == 1206:
-            continue
-        response = requests.get(category_urls[cat_id], impersonate="safari_ios")
-        json = response.json()
-
-        for category in json['eventGroup']['offerCategories']:
-            if 'offerSubcategoryDescriptors' in category.keys():
-                for offer in category['offerSubcategoryDescriptors'][0]['offerSubcategory']['offers']:
-                    for i in offer:
-                        for outcome in i['outcomes']:
-                            dict = outcome
-                            dict['category'] = cat_names[cat_id]
-                            if 'label' in i.keys():
-                                dict['prop_label'] = i['label']
-                            else:
-                                print(i)
-                                continue
-                            csv_data.append(dict)
+                            
+                            csv_data.append(fill_unlabeled_keys(dict, csv_data)) #some key values are not addressed by DK
 
     # turn the data in csv_data into a csv file
-
-    with open('draftkings_nba.csv', 'w', newline='') as file:
+    with open(f'draftkings_{sport}.csv', 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(csv_data[0].keys())
+        headers = csv_data[0].keys()
+        writer.writerow(headers)
         for row in csv_data:
-            writer.writerow(row.values())
+            writer.writerow([row.get(key, "None Specified") for key in headers])
+
+def fill_unlabeled_keys(dic, csv_data):
+    if (len(csv_data) == 0):
+        return dic
+
+    if (dic.keys() == csv_data[0].keys()):
+        return dic
+    
+    for key in csv_data[0].keys():
+        if key not in dic.keys():
+            # print(f"Adding key {key} to dict")
+            dic[key] = "None Specified"
+
+    return dic
+
+
 
 # %%
-get_draftkings_nba_data()
-
+get_dk_data("mlb")
