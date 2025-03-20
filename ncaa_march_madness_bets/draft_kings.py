@@ -82,24 +82,60 @@ def get_dk_data(sport):
 
     csv_data = []
 
+    # NEW PLAN: Get a list of all subcategories, then get the data for each subcategory
+    subcategories = list()
+    offers = list()
     for cat_id in category_urls:
         print(f"Getting data at website {category_urls[cat_id]}", cat_names[cat_id])
-        json = get_json(category_urls[cat_id])
-          
+        jason = get_json(category_urls[cat_id])
+        for category in jason['eventGroup']['offerCategories']:
+            if 'offerSubcategoryDescriptors' in category.keys(): 
+                if category['offerSubcategoryDescriptors'] is not None: #i'm not entirely sure if these two checks are necessary, but alas
+                    for subcat in category['offerSubcategoryDescriptors']:
+                        if "offerSubcategory" not in subcat.keys():
+                            subcategories.append({
+                                "subcatId": subcat['subcategoryId'],
+                                "catId": cat_id
+                            })
+                        else:
+                            for offer in subcat['offerSubcategory']['offers']:
+                                offers.append({
+                                    "offer": offer,
+                                    "category": category['name'],
+                                    "subcat": subcat['name']
+                                })
 
-        for category in json['eventGroup']['offerCategories']:
-            # TODO: GRAB THIS DATA
-            if 'offerSubcategoryDescriptors' in category.keys():
-                for offer in category['offerSubcategoryDescriptors'][0]['offerSubcategory']['offers']:
-                    for i in offer:
-                        for outcome in i['outcomes']:
-                            dict = outcome
-                            dict['category'] = cat_names[cat_id]
-                            if 'label' in i.keys():
-                                dict['prop_label'] = i['label']
 
-                            
-                            csv_data.append(fill_unlabeled_keys(dict, csv_data)) #some key values are not addressed by DK
+
+    for subcat in subcategories:
+        print(f"Getting data for ", subcat)
+        jason = get_json(f"https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/{json['eventGroup']['eventGroupId']}/categories/{subcat['catId']}/subcategories/{subcat['subcatId']}?format=json")
+        for category in jason['eventGroup']['offerCategories']:
+            if 'offerSubcategoryDescriptors' in category.keys(): 
+                if category['offerSubcategoryDescriptors'] is not None: #i'm not entirely sure if these two checks are necessary, but alas
+                    for subcat in category['offerSubcategoryDescriptors']:
+                        if "offerSubcategory" not in subcat.keys():
+                            continue
+                        for offer in subcat['offerSubcategory']['offers']:
+                            offers.append({
+                                "offer": offer,
+                                "category": category['name'],
+                                "subcat": subcat['name']
+                                })
+                
+                
+                
+    for offer in offers:
+        for i in offer["offer"]:
+            for outcome in i['outcomes']:
+                dict = outcome
+                dict['category'] = offer['category']
+                dict['subcategory'] = offer['subcat']
+                if 'label' in i.keys():
+                    dict['prop_label'] = i['label']
+
+                
+                csv_data.append(fill_unlabeled_keys(dict, csv_data)) #some key values are not addressed by DK
 
     # turn the data in csv_data into a csv file
     with open(f'draftkings_{sport}.csv', 'w', newline='') as file:
@@ -126,4 +162,4 @@ def fill_unlabeled_keys(dic, csv_data):
 
 
 # %%
-get_dk_data("mlb")
+get_dk_data("cbb")

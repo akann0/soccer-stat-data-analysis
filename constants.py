@@ -129,15 +129,16 @@ PP_TO_DK_STATS = {
     "Fantasy Score": "fantasy score",
     "3-PT Made": "three pointers made",
     'Hits Allowed': 'hits',
-    'Pitcher Strikeouts': 'Strikeouts Thrown',
+    'Pitcher Strikeouts': 'strikeouts thrown',
     'Pitching Outs': 'outs',
     # 'Earned Runs Allowed': 'earned runs',
     'Walks Allowed': 'walks',
-    'Hits+Runs+RBIS': 'hits + runs + rbis',
+    'Hits+Runs+RBIs': 'hits + runs + rbis',
     'Hitter Strikeouts': 'hitter strikeouts',
     'Total Bases': 'total bases',
     'Runs': 'runs',
-    'Walks': 'walks'
+    'Walks': 'walks', 
+    'Total Bases': 'total bases'
 }
 
 DK_TO_PP_STATS = {
@@ -151,14 +152,15 @@ DK_TO_PP_STATS = {
     "fantasy score": "Fantasy Score",
     "three pointers made": "3-PT Made",
     'hits': 'Hits Allowed',
-    'Strikeouts hrown': 'Pitcher Strikeouts',
+    'strikeouts thrown': 'Pitcher Strikeouts',
     'outs': 'Pitching Outs',
     # 'earned runs': 'Earned Runs Allowed',
     'walks': 'Walks Allowed',
-    'hits + runs + rbis': 'Hits+Runs+RBIS',
+    'hits + runs + rbis': 'Hits+Runs+RBIs',
     'hitter strikeouts': 'Hitter Strikeouts',
     'total bases': 'Total Bases',
     'runs': 'Runs',
-    'walks': 'Walks'
+    'walks': 'Walks',
+    'total bases': 'Total Bases'
 }
 

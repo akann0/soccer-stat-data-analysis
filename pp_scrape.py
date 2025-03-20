@@ -3,6 +3,9 @@ import json, csv
 from unidecode import unidecode
 from constants import *
 
+BASEBALL_ID = "2"
+SOCCER_ID = "82"
+
 
 def check(s):
     print(type(s)   )
@@ -59,7 +62,7 @@ def is_sport(datapoint, sport_id = "82"):
     return False
 
 # Get the data
-def get_data(sport_id = "82"):
+def get_data(sport_id = BASEBALL_ID):
     data = get_data_scrape_cffi()
     # data = get_data_file("pp_sample_web_data.json")
 
@@ -73,7 +76,7 @@ def get_data(sport_id = "82"):
             if is_sport(inc, sport_id):
                 players[inc["id"]] = inc
 
-    # print(len(players), len(lines))
+    print(len(players), len(lines))
     # print_a_player(players)
 
     # Get the lines, and save them to a dictionary with player names as keys
@@ -89,17 +92,19 @@ def get_data(sport_id = "82"):
                         player_name = unidecode(players[player_id]["attributes"]["display_name"])
                         lines[player_name] = [datapoint] if player_name not in lines.keys() else lines[player_name] + [datapoint]
 
+
     final_csv = list()
     stat_types = list()
     for player in lines:
-        if is_multiple_players(player):
+        # gets rid of lines such as Ohtani + Trout RBIs, etc.
+        if is_multiple_players(player): 
             continue
         dic = {'name': player}
         for line in lines[player]:
             if "attributes" in line.keys():
                 # GOAL: add the opponent to the dictionary
-                print(line["attributes"].keys())
-                print(line["attributes"])
+                # print(line["attributes"].keys())
+                # print(line["attributes"])
                 if "description" in line["attributes"].keys():
                     dic["opponent"] = unidecode(line["attributes"]["description"])
 
@@ -108,6 +113,7 @@ def get_data(sport_id = "82"):
                     stat_types = stat_types + [line["attributes"]["stat_type"]] if line["attributes"]["stat_type"] not in stat_types else stat_types
         final_csv.append(dic)
 
+    print("xx")
     with open("pp_lines.csv", "w") as f:
         writer = csv.DictWriter(f, fieldnames=["name", "opponent"] + stat_types)
         writer.writeheader()
@@ -115,5 +121,6 @@ def get_data(sport_id = "82"):
 
     return final_csv
 
+print("here")
 get_data()
-
+print("done")
