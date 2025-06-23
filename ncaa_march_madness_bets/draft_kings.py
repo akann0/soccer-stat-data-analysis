@@ -86,6 +86,9 @@ def get_dk_data(sport):
     subcategories = list()
     offers = list()
     for cat_id in category_urls:
+        #TODO: Remove this if statement after Saturday
+        # if (cat_names[cat_id] not in ["Player Points", "Player Assists", "Player Threes", "Player Rebounds", "Player Defense", "Player Combos", "Player Turnovers"]):
+        #     continue
         print(f"Getting data at website {category_urls[cat_id]}", cat_names[cat_id])
         jason = get_json(category_urls[cat_id])
         for category in jason['eventGroup']['offerCategories']:
@@ -110,6 +113,8 @@ def get_dk_data(sport):
     for subcat in subcategories:
         print(f"Getting data for ", subcat)
         jason = get_json(f"https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/{json['eventGroup']['eventGroupId']}/categories/{subcat['catId']}/subcategories/{subcat['subcatId']}?format=json")
+        if 'eventGroup' not in jason.keys():
+            continue
         for category in jason['eventGroup']['offerCategories']:
             if 'offerSubcategoryDescriptors' in category.keys(): 
                 if category['offerSubcategoryDescriptors'] is not None: #i'm not entirely sure if these two checks are necessary, but alas
@@ -162,4 +167,5 @@ def fill_unlabeled_keys(dic, csv_data):
 
 
 # %%
-get_dk_data("cbb")
+get_dk_data("mlb")
+get_dk_data("nba")
