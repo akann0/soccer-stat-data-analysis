@@ -13,4 +13,9 @@ The study can be found [here](data_analyses/xg_vs_g.html).
 The final one (so far) is about a player's previous year statistics.  At the very beginning of a season, it can be hard to determine if a player's statistical improvement is a measure of variable noise or truly a sustainable improvement.  I seeked to determine if there was a definitive point where a player's to date statistics were a better predictor of future outcomes than a player's previous year statistics(i.e. a point where a player's change in stats can be considered legitimate).  
 The study can be found [here](data_analyses/prev_vs_ytd.html).
 
-All data scraped from [Football Reference](https://fbref.com/en/).
+UPDATE 2026-01: There's also more using positional data and Markov Chaining to determine the value of a pass,
+that can be found [here](soccerdata/soccerdata.html)
+
+
+All data scraped from [Football Reference](https://fbref.com/en/),
+the latter half using a Project called [soccerdata](https://github.com/probberechts/soccerdata)
