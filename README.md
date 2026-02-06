@@ -14,7 +14,7 @@ The final one (so far) is about a player's previous year statistics.  At the ver
 The study can be found [here](data_analyses/prev_vs_ytd.html).
 
 UPDATE 2026-01: There's also more using positional data and Markov Chaining to determine the value of a pass,
-that can be found [here](soccerdata/soccerdata.html), 
+that can be found [here](soccerdata/soccerdata_claude.html), 
 
 2026-02-04: It's come to my attention that the HTML conversion of that Jupyter notebook is quite unreadable -
 fixing it rn!
